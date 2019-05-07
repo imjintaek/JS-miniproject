@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <h3>에버랜드 매출측정창</h3>
+    <br><hr><br>
+    <form id="ticketReset">
+    <input type="radio" name="ticket" value="day">주간권 <br>
+    <input type="radio" name="ticket" value="night">야간권 <br>
+    <input type="radio" name="ticket" value="2day">2일권 <br>
+    </form>
+    <br><hr><br>
+    <form id="humanTypeReset">
+    <input type="radio" name="humantype" onclick="checkNotDisabled()" value="adult">대인 <br>
+    <input type="radio" name="humantype" onclick="checkNotDisabled()" value="youth">청소년 <br>
+    <input type="radio" name="humantype" onclick="checkNotDisabled()" value="child">소인/경로 <br>
+    <input type="radio" name="humantype" onclick="checkDisabled()" value="disabled">장애인 <br>
+    </form>
+    <br><hr><br>
+    <form id="checkDisabled" style="display: none">
+        <input type="radio" name="disabledGrade" onclick="showbutton()" value="high">1~3급 <br>
+        <input type="radio" name="disabledGrade" onclick="showbutton()" value="low">4~6급  <br>
+        <br><hr><br>
+    </form>
+    <div id="submission" style="display : none">
+        <input type="button" onclick="result()" value="구매">
+        <br><hr><br>
+    </div>
+
+    <div id="result"></div>
+    <script>
+        var sales = [];
+        function showbutton(){
+            document.getElementById("submission").style.display = 'block';
+        }
+        function checkDisabled(){
+            if(document.getElementById("checkDisabled").style.display == 'none'){
+                document.getElementById("checkDisabled").style.display = 'block';
+                document.getElementById("submission").style.display = 'none';
+            }
+        }
+        function checkNotDisabled(){
+            document.getElementById("checkDisabled").reset();
+            document.getElementById("checkDisabled").style.display = 'none';
+            document.getElementById("submission").style.display = 'block';
+        }
+        function result(){
+            let ticketradio = document.getElementsByName("ticket");
+            let ticketValue;
+            for(var i = 0; i < ticketradio.length; i++){
+                if(ticketradio[i].checked){
+                    ticketValue = ticketradio[i].value;
+                }
+            }
+
+            let humantyperadio = document.getElementsByName("humantype");
+            let humantyperValue;
+            for(var i = 0; i < humantyperadio.length; i++){
+                if(humantyperadio[i].checked){
+                    humantyperValue = humantyperadio[i].value;
+                }
+            }
+            
+            let disabledGradeValue;
+            if(humantyperValue == 'disabled'){
+                let disabledGradeRadio = document.getElementsByName("disabledGrade");
+                for(var i = 0; i < disabledGradeRadio.length;i++){
+                    if(disabledGradeRadio[i].checked){
+                        disabledGradeValue = disabledGradeRadio[i].value;
+                    }
+                }
+            }
+    
+            let price;
+            //주간권
+            if(ticketValue == 'day'){
+                if(humantyperValue == 'adult'){
+                    price = 56000;
+                }else if(humantyperValue == 'youth'){
+                    price = 47000;
+                }else if(humantyperValue == 'child'){
+                    price = 44000;
+                }else if(humantyperValue == 'disabled'){
+                    price = 56000;
+                }
+            }else if(ticketValue == 'night'){           //야간권
+                if(humantyperValue == 'adult'){
+                    price = 46000;
+                }else if(humantyperValue == 'youth'){
+                    price = 40000;
+                }else if(humantyperValue == 'child'){
+                    price = 37000;
+                }else if(humantyperValue == 'disabled'){
+                    price = 46000;
+                }
+            }else if(ticketValue == '2day'){           //2일권
+                if(humantyperValue == 'adult'){
+                    price = 87000;
+                }else if(humantyperValue == 'youth'){
+                    price = 73000;
+                }else if(humantyperValue == 'child'){
+                    price = 69000;
+                }else if(humantyperValue == 'disabled'){
+                    price = 87000;
+                }
+            }
+            //고객 부모
+            let customer = {
+                ticketType:ticketValue
+            }
+
+            if(!(humantyperValue == 'disabled')){
+                sales.push(nonDisabled = {
+                    __proto__:customer,
+                    humanType:humantyperValue,
+                    price
+                });
+            }else{
+                sales.push(Disabled ={
+                    __proto__:customer,
+                    grade:disabledGradeValue,
+                    price
+                });
+            }
+            
+            function checkDisabled(value){
+                if(value.grade != undefined){
+                    return value;
+                }
+            }
+
+            function disCount(value){
+                if(value.grade == 'high'){
+                    value.disprice = Math.round(value.price * 0.5);
+                    return value;
+                }else if(value.grade == 'low'){
+                    value.disprice = Math.round(value.price * 0.7);
+                    return value;
+                }
+            }
+            let temp = 0;
+            function totalPrice(accmulator,currentValue){
+                if(accmulator.disprice == undefined){
+                    temp = temp + currentValue.disprice;
+                }else{
+                    temp = temp + accmulator.disprice;
+                }
+                return temp;
+            }
+            
+            let allDisabled = sales.filter(checkDisabled);
+            let disabledData = allDisabled.map(disCount);
+            if(disabledData.length == 1){
+                document.getElementById("result").innerHTML = "<h3>장애인 총 매출: " + disabledData[0].disprice +"</h3>";
+            }else{
+                let sum = disabledData.reduce(totalPrice) + disabledData[0].disprice;
+                document.getElementById("result").innerHTML = "<h3>장애인 총 매출: " + sum +"</h3>";
+            }
+            
+            
+            document.getElementById("checkDisabled").style.display = 'none';
+            document.getElementById("submission").style.display = 'none';
+            document.getElementById("checkDisabled").reset();
+            document.getElementById("humanTypeReset").reset();
+            document.getElementById("ticketReset").reset();
+        }
+    </script>
+</body>
+</html>
